@@ -72,13 +72,14 @@ runall:
 
 routev2:
 	@echo "Sending traffic to v2"
-	oc create -f istiofiles/destination-rule-catalog-v1-v2.yml -n $(OCP_TUTORIAL_PROJECT) --as=system:admin
+	-oc create -f istiofiles/destination-rule-catalog-v1-v2.yml -n $(OCP_TUTORIAL_PROJECT) --as=system:admin
 	oc create -f istiofiles/virtual-service-catalog-v2.yml -n $(OCP_TUTORIAL_PROJECT) --as=system:admin
 
 routev1:
 	@echo "Sending traffic to v1"
+	-oc create -f istiofiles/destination-rule-catalog-v1-v2.yml -n $(OCP_TUTORIAL_PROJECT) --as=system:admin
 	oc replace -f istiofiles/virtual-service-catalog-v1.yml -n $(OCP_TUTORIAL_PROJECT) --as=system:admin
 
 routedefault:
 	@echo "Round-robin traffic"
-	oc delete -f istiofiles/virtual-service-catalog-v1.yml -n $(OCP_TUTORIAL_PROJECT) --as=system:admin
+	-oc delete -f istiofiles/virtual-service-catalog-v1.yml -n $(OCP_TUTORIAL_PROJECT) --as=system:admin
