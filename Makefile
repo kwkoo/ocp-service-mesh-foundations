@@ -1,5 +1,6 @@
 # Note: You have to be logged in as a user that has the abilty to become
-# system:admin
+# system:admin. You can enable this by executing the following:
+# oc create clusterrolebinding <any_valid_name> --clusterrole=sudoer --user=<username>
 
 OCP_TUTORIAL_PROJECT=sm-demo
 
