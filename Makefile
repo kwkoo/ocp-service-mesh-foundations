@@ -23,7 +23,7 @@ deploy: createproj updatescc deploycatalog deploypartner deploygateway deploycat
 	@echo "Deployment complete"
 
 createproj:
-	oc new-project $(OCP_TUTORIAL_PROJECT)
+	oc new-project $(OCP_TUTORIAL_PROJECT) || oc project $(OCP_TUTORIAL_PROJECT)
 
 updatescc:
 	@echo "Update SCCs"
