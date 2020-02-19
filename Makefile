@@ -24,6 +24,8 @@ deploy: createproj updatescc deploycatalog deploypartner deploygateway deploycat
 
 createproj:
 	oc new-project $(OCP_TUTORIAL_PROJECT)
+	@echo "Sleeping to allow service mesh to catch up..."
+	@sleep 5
 
 updatescc:
 	@echo "Update SCCs"
