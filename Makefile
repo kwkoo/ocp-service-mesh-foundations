@@ -1,5 +1,6 @@
 # Note: You have to be logged in as a user that has the abilty to become
-# system:admin
+# system:admin. You can enable this by executing the following:
+# oc create clusterrolebinding <any_valid_name> --clusterrole=sudoer --user=<username>
 
 OCP_TUTORIAL_PROJECT=sm-demo
 
@@ -23,7 +24,7 @@ deploy: createproj updatescc deploycatalog deploypartner deploygateway deploycat
 	@echo "Deployment complete"
 
 createproj:
-	oc new-project $(OCP_TUTORIAL_PROJECT)
+	oc new-project $(OCP_TUTORIAL_PROJECT) || oc project $(OCP_TUTORIAL_PROJECT)
 	@echo "Sleeping to allow service mesh to catch up..."
 	@sleep 5
 
@@ -74,13 +75,14 @@ runall:
 
 routev2:
 	@echo "Sending traffic to v2"
-	oc create -f istiofiles/destination-rule-catalog-v1-v2.yml -n $(OCP_TUTORIAL_PROJECT) --as=system:admin
+	-oc create -f istiofiles/destination-rule-catalog-v1-v2.yml -n $(OCP_TUTORIAL_PROJECT) --as=system:admin
 	oc create -f istiofiles/virtual-service-catalog-v2.yml -n $(OCP_TUTORIAL_PROJECT) --as=system:admin
 
 routev1:
 	@echo "Sending traffic to v1"
+	-oc create -f istiofiles/destination-rule-catalog-v1-v2.yml -n $(OCP_TUTORIAL_PROJECT) --as=system:admin
 	oc replace -f istiofiles/virtual-service-catalog-v1.yml -n $(OCP_TUTORIAL_PROJECT) --as=system:admin
 
 routedefault:
 	@echo "Round-robin traffic"
-	oc delete -f istiofiles/virtual-service-catalog-v1.yml -n $(OCP_TUTORIAL_PROJECT) --as=system:admin
+	-oc delete -f istiofiles/virtual-service-catalog-v1.yml -n $(OCP_TUTORIAL_PROJECT) --as=system:admin
