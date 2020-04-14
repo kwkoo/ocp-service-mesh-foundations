@@ -19,6 +19,8 @@ usage:
 	@echo "\troute requests to catalog v1"
 	@echo "routedefault"
 	@echo "\troute requests to both catalog v1 and v2"
+	@echo "kiali"
+	@echo "\topen a web browser to the kiali web UI"
 
 deploy: createproj updatescc deploycatalog deploypartner deploygateway deploycatalogv2
 	@echo "Deployment complete"
@@ -75,14 +77,17 @@ runall:
 
 routev2:
 	@echo "Sending traffic to v2"
-	-oc create -f istiofiles/destination-rule-catalog-v1-v2.yml -n $(OCP_TUTORIAL_PROJECT) --as=system:admin
-	oc create -f istiofiles/virtual-service-catalog-v2.yml -n $(OCP_TUTORIAL_PROJECT) --as=system:admin
+	-oc apply -f istiofiles/destination-rule-catalog-v1-v2.yml -n $(OCP_TUTORIAL_PROJECT) --as=system:admin
+	oc apply -f istiofiles/virtual-service-catalog-v2.yml -n $(OCP_TUTORIAL_PROJECT) --as=system:admin
 
 routev1:
 	@echo "Sending traffic to v1"
-	-oc create -f istiofiles/destination-rule-catalog-v1-v2.yml -n $(OCP_TUTORIAL_PROJECT) --as=system:admin
-	oc replace -f istiofiles/virtual-service-catalog-v1.yml -n $(OCP_TUTORIAL_PROJECT) --as=system:admin
+	-oc apply -f istiofiles/destination-rule-catalog-v1-v2.yml -n $(OCP_TUTORIAL_PROJECT) --as=system:admin
+	oc apply -f istiofiles/virtual-service-catalog-v1.yml -n $(OCP_TUTORIAL_PROJECT) --as=system:admin
 
 routedefault:
 	@echo "Round-robin traffic"
-	-oc delete -f istiofiles/virtual-service-catalog-v1.yml -n $(OCP_TUTORIAL_PROJECT) --as=system:admin
+	-oc delete virtualservice/catalog -n $(OCP_TUTORIAL_PROJECT) --as=system:admin
+
+kiali:
+	@open `oc get route/kiali -n istio-system -o jsonpath='{"https://"}{.spec.host}{"\n"}'`
