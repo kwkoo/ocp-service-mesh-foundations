@@ -70,7 +70,7 @@ deploycatalogv2:
 	 -n $(OCP_TUTORIAL_PROJECT)
 
 curlgw:
-	curl http://`oc get route gateway -n $(OCP_TUTORIAL_PROJECT) -o template --template='{{.spec.host}}'`
+	@scripts/curl_gw.sh
 
 runall:
 	@scripts/run-all.sh
