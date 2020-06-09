@@ -2,13 +2,24 @@
 
 PROJ=sm-demo
 
-cat <<EOF | oc apply -n istio-system -f -
+apiserver=$(oc whoami --show-server)
+if [[ $apiserver =~ ".example.opentlc.com" ]]; then
+  suffix=$(echo $apiserver | sed -e 's|https://api\.\([^:]*\).*|apps.\1|')
+else
+  echo "error - not running on RHPDS"
+  exit 1
+fi
+
+echo "Routing suffix $suffix"
+
+echo "Creating route..."
+cat <<EOF | sed -e "s|ROUTING_SUFFIX|$suffix|" | oc apply -n istio-system -f -
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: sm-demo-gateway
 spec:
-  host: gateway.test.example.com
+  host: gateway.ROUTING_SUFFIX
   port:
     targetPort: 8080
   to:
@@ -18,7 +29,9 @@ spec:
   wildcardPolicy: None
 EOF
 
-cat <<EOF | oc apply -n ${PROJ} -f -
+
+echo "Creating gateway and virtualservice..."
+cat <<EOF | sed -e "s|ROUTING_SUFFIX|$suffix|" | oc apply -n ${PROJ} -f -
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
@@ -28,7 +41,7 @@ spec:
     istio: ingressgateway
   servers:
   - hosts:
-    - '*'
+    - 'gateway.ROUTING_SUFFIX'
     port:
       name: http
       number: 80
@@ -37,13 +50,12 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  annotations:
   name: gateway
 spec:
   gateways:
   - gateway
   hosts:
-  - gateway.test.example.com
+  - gateway.ROUTING_SUFFIX
   http:
   - route:
     - destination:
